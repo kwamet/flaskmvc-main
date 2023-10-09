@@ -6,6 +6,11 @@ class Student(db.Model):
     karma = db.Column(db.Integer, nullable=False)
     reviews = db.relationship('Review', backref='student', lazy=True)
 
+    def __init__(self, studentId, studentName):
+        self.studentId = studentId
+        self.studentName = studentName
+        self.karma = 0
+
    def calculate_karma(self):
        self.karma = 0
        for review in self.reviews:
@@ -16,6 +21,6 @@ class Student(db.Model):
         return {
             'studentId': self.studentId,
             'studentName': self.studentName,
-            'karma': self.karma
+            'karma': self.get_karma(),
             'reviews': self.reviews
         }
