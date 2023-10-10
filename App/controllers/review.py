@@ -29,7 +29,7 @@ def delete_review(id):
     return review
 
 def get_review(id):
-    return Review.query.filter_by(id=id).first()
+    review = Review.query.filter_by(id=id).first()
     if review is None:
         return None
     return review.toJSON()
