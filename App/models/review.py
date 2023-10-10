@@ -2,32 +2,33 @@ from App.database import db
 from datetime import datetime
 
 class Review(db.Model):
+    __tablename__ = 'review'
     reviewId = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(10), db.ForeignKey('user.userId'), nullable=False)
-    studentId = db.Column(db.String(10), db.ForeignKey('student.studentId'), nullable=False)
+    user_id = db.Column(db.String(10), db.ForeignKey('user.id'), nullable=False)
+    student_id = db.Column(db.String(10), db.ForeignKey('student.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(500), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    upVotes = db.Column(db.Integer, nullable=False, default=0)
-    downVotes = db.Column(db.Integer, nullable=False, default=0)
+    up_votes = db.Column(db.Integer, nullable=False, default=0)
+    down_votes = db.Column(db.Integer, nullable=False, default=0)
 
-    def __init__(self, userId, studentId, rating, comment):
-        self.userId = userId
-        self.studentId = studentId
+    def __init__(self, user_id, student_id, rating, comment):
+        self.user_id = user_id
+        self.student_id = student_id
         self.rating = rating
         self.comment = comment
-        self.upVotes = 0
-        self.downVotes = 0
+        self.up_votes = 0
+        self.down_votes = 0
 
     def toJSON(self):
         return {
             'reviewId': self.reviewId,
-            'userId': self.userId,
-            'studentId': self.studentId,
+            'user_id': self.user_id,
+            'student_id': self.student_id,
             'rating': self.rating,
             'comment': self.comment,
             'date': self.date,
-            'upVotes': self.upVotes,
-            'downVotes': self.downVotes
+            'up_votes': self.up_votes,
+            'down_votes': self.down_votes
         }
         

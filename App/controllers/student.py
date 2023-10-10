@@ -4,13 +4,13 @@ from App.config import config
 import requests
 import json
 
-def create_student(name=name, degree=degree, faculty=faculty):
-    student = Student(name, degree, faculty)
+def create_student(name, faculty, degree):
+    student = Student(name, faculty, degree)
     db.session.add(student)
     db.session.commit()
     return student
 
-def update_student(id, name=name, degree=degree, faculty=faculty):
+def update_student(id, name, degree, faculty):
     student = Student.query.filter_by(id=id).first()
     student.name = name
     student.degree = degree
