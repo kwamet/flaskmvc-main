@@ -1,7 +1,6 @@
 from App.models import Student
 from App.database import db
 from App.config import config
-import requests
 import json
 
 def create_student(name, faculty, degree):

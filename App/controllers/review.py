@@ -1,7 +1,7 @@
 from App.models import Review, Student, User
 from App.database import db
 
-def create_review(student_id, rating, comment, userId):
+def create_review(student_id, rating, comment, user_id):
     if student_id:
         review = Review(student_id, rating, comment, user_id)
         db.session.add(review)
@@ -9,8 +9,8 @@ def create_review(student_id, rating, comment, userId):
         return review
     return None
 
-def update_review(id, student_id, rating, comment, userId):
-    if userId==Review.query.filter_by(id=id).first().userId:
+def update_review(id, student_id, rating, comment, user_id):
+    if user_id==Review.query.filter_by(id=id).first().user_id:
         review = Review.query.filter_by(id=id).first()
         if review is None:
             return None
@@ -42,9 +42,9 @@ def get_reviews_by_student(student_id):
         return Review.query.filter_by(student_id=student_id).all()
     return None
 
-def get_reviews_by_user(userId):
-    if userId:
-        return Review.query.filter_by(userId=userId).all()
+def get_reviews_by_user(user_id):
+    if user_id:
+        return Review.query.filter_by(user_id=user_id).all()
     return None
     
 def upvote_review(id):
