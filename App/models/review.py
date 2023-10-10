@@ -3,7 +3,7 @@ from datetime import datetime
 
 class Review(db.Model):
     __tablename__ = 'review'
-    reviewId = db.Column(db.Integer, primary_key=True)
+    reviewId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.String(10), db.ForeignKey('user.id'), nullable=False)
     student_id = db.Column(db.String(10), db.ForeignKey('student.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)

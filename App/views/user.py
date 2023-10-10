@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import current_user, login_required
+from sqlalchemy.exc import IntegrityError
+
 
 from.index import index_views
 
@@ -9,6 +11,7 @@ from App.controllers import (
     jwt_authenticate, 
     get_all_users,
     get_all_users_json,
+    get_user_by_username,
     jwt_required
 )
 
@@ -24,19 +27,18 @@ def get_users_action():
     users = get_all_users_json()
     return jsonify(users)
 
-@user_views.route('/api/users', methods=['POST'])
-def create_user_endpoint():
-    data = request.json
-    create_user(data['username'], data['password'])
-    return jsonify({'message': f"user {data['username']} created"})
-
+#Register a new user
 @user_views.route('/users', methods=['POST'])
-def create_user_action():
-    data = request.form
-    flash(f"User {data['username']} created!")
-    create_user(data['username'], data['password'])
-    return redirect(url_for('user_views.get_user_page'))
-
+def register_user():
+    data = request.json
+    username = data['username']
+    password = data['password']
+    try:
+        create_user(username, password)
+        return jsonify({'message': f"user {username} created"})
+    except IntegrityError:
+        return jsonify({'message': f"username {username} already exists"}), 409
+  
 @user_views.route('/static/users', methods=['GET'])
 def static_user_page():
   return send_from_directory('static', 'static-user.html')

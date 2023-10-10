@@ -2,9 +2,8 @@ from App.models import Review, Student, User
 from App.database import db
 
 def create_review(student_id, rating, comment, user_id):
-    if student_id:
-        review = Review(student_id, rating, comment, user_id)
-        db.session.add(review)
+    if student_id == Student.query.filter_by(id=student_id).first().id:
+        review =  Review(user_id, student_id, rating, comment)  
         db.session.commit()
         return review
     return None

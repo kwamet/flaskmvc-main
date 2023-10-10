@@ -2,7 +2,7 @@ from App.database import db
 
 class Student(db.Model):
     __tablename__ = 'student'
-    id = db.Column(db.String(10), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
     faculty = db.Column(db.String(50), nullable=False)
     degree = db.Column(db.String(50), nullable=False)
@@ -26,6 +26,6 @@ class Student(db.Model):
         return {
             'studentId': self.id,
             'studentName': self.name,
-            'karma': self.get_karma(),
+            'karma': self.calculate_karma(),
             'reviews': self.reviews
         }
