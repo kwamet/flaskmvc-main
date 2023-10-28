@@ -4,13 +4,34 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from App.main import create_app
 from App.database import db, create_db
 from App.models import User
-from App.controllers import (
+from App.controllers.user import (
     create_user,
-    get_all_users_json,
-    login,
-    get_user,
     get_user_by_username,
+    get_user,
+    get_all_users,
+    get_all_users_json,
     update_user
+)
+from App.controllers.student import (
+    create_student,
+    update_student,
+    delete_student,
+    get_student_by_id
+    get_student_by_name,
+    get_all_students,
+    get_all_students_json,
+    get_student_json
+)
+from App.controllers.review import (
+    create_review,
+    update_review,
+    delete_review,
+    get_review,
+    get_all_reviews,
+    get_reviews_by_student
+    get_reviews_by_user
+    upvote_review,
+    downvote_review
 )
 
 
@@ -41,6 +62,159 @@ class UserUnitTests(unittest.TestCase):
         password = "mypass"
         user = User("bob", password)
         assert user.check_password(password)
+
+# Unit tests for Student model
+class StudentUnitTests(unittest.TestCase):
+    def test_new_student(self):
+        student = Student("Kwame Trancoso", "Engineering", "Bachelor's")
+        assert (
+            student.name == "Kwame Trancoso"
+            and student.faculty == "Engineering"
+            and student.programme == "Bachelor's"
+        )
+
+    def test_student_to_json(self):
+        student = Student("Kwame Trancoso", "Engineering", "Bachelor's")
+        student_json = student.to_json()
+        self.assertDictEqual(
+            student_json,
+            {
+                "faculty": "Engineering",
+                "id": None,
+                "karma": 0,
+                "name": "Kwame Trancoso",
+                "degree": "Bachelor's",
+            },
+        )
+
+    def test_student_karma(self):
+        with self.subTest("No reviews"):
+            student = Student("Kwame Trancoso", "Engineering", "Bachelor's")
+            self.assertEqual(student.get_karma(), 0)
+
+        with self.subTest("No reviews"):
+            student = Student("Kwame Trancoso", "Engineering", "Bachelor's")
+            mockReview = Review(1, 1, 4, "good")
+            mockReview.vote(1, "up")
+            student.reviews.append(mockReview)
+            self.assertEqual(student.get_karma(), 1)
+
+        with self.subTest("One negative review"):
+            student = Student("Kwame Trancoso", "Engineering", "Bachelor's")
+            mockReview1 = Review(1, 1, 1, "good")
+            mockReview1.vote(1, "down")
+            student.reviews.append(mockReview1)
+            self.assertEqual(student.get_karma(), -1)
+
+
+# Unit tests for Review model
+class ReviewUnitTests(unittest.TestCase):
+    def test_new_review(self):
+        review = Review(1, 1, 4, "good")
+        assert review.student_id == 1 and review.user_id == 1 and review.rating = 1 and review.comment == "good"
+
+    def test_review_to_json(self):
+        review = Review(1, 1, 4, "good")
+        review_json = review.to_json()
+        self.assertDictEqual(
+            review_json,
+            {
+                "id": None,
+                "user_id": 1,
+                "student_id": 1,
+                "comment": "good",
+                "karma": 0,
+                "num_upvotes": 0,
+                "num_downvotes": 0
+            },
+        )
+
+    def test_review_vote(self):
+        with self.subTest("Upvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "up")
+            self.assertEqual(review.votes["num_upvotes"], 1)
+
+        with self.subTest("Downvote"):
+            review = Review(1, 1, "good")
+            review.vote(1, "down")
+            self.assertEqual(review.votes["num_downvotes"], 1)
+
+    def test_review_get_num_upvotes(self):
+        with self.subTest("No votes"):
+            review = Review(1, 1, 4, "good")
+            self.assertEqual(review.get_num_upvotes(), 0)
+
+        with self.subTest("One upvote"):
+            review = Review(1, 1, "good")
+            review.vote(1, "up")
+            self.assertEqual(review.get_num_upvotes(), 1)
+
+        with self.subTest("One downvote"):
+            review = Review(1, 1, "good")
+            review.vote(1, "down")
+            self.assertEqual(review.get_num_upvotes(), 0)
+
+    def test_review_get_num_downvotes(self):
+        with self.subTest("No votes"):
+            review = Review(1, 1, 4, "good")
+            self.assertEqual(review.get_num_downvotes(), 0)
+
+        with self.subTest("One upvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "up")
+            self.assertEqual(review.get_num_downvotes(), 0)
+
+        with self.subTest("One downvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "down")
+            self.assertEqual(review.get_num_downvotes(), 1)
+
+    def test_review_get_karma(self):
+        with self.subTest("No votes"):
+            review = Review(1, 1, 4, "good")
+            self.assertEqual(review.get_karma(), 0)
+
+        with self.subTest("One upvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "up")
+            self.assertEqual(review.get_karma(), 1)
+
+        with self.subTest("One downvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "down")
+            self.assertEqual(review.get_karma(), -1)
+
+    def test_review_get_all_votes(self):
+        with self.subTest("No votes"):
+            review = Review(1, 1, 4, "good")
+            self.assertEqual(
+                review.get_all_votes(), {"num_upvotes": 0, "num_downvotes": 0}
+            )
+
+        with self.subTest("One upvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "up")
+            self.assertEqual(
+                review.get_all_votes(), {1: "up", "num_upvotes": 1, "num_downvotes": 0}
+            )
+
+        with self.subTest("One downvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "down")
+            self.assertEqual(
+                review.get_all_votes(),
+                {1: "down", "num_upvotes": 0, "num_downvotes": 1},
+            )
+
+        with self.subTest("One upvote and one downvote"):
+            review = Review(1, 1, 4, "good")
+            review.vote(1, "up")
+            review.vote(2, "down")
+            self.assertEqual(
+                review.get_all_votes(),
+                {1: "up", 2: "down", "num_upvotes": 1, "num_downvotes": 1},
+            )
 
 '''
     Integration Tests
